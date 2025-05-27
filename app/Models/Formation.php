@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Formation extends Model
 {
@@ -16,10 +16,11 @@ class Formation extends Model
         'date_debut',
         'date_fin',
         'date_limite_depot',
-        'date_heure',
+        'heure',      // heure au format "HH:MM:SS"
         'duree',
         'prix',
         'lieu',
+        'type',
         'id_categorie',
     ];
 
@@ -28,9 +29,19 @@ class Formation extends Model
         'date_debut' => 'date',
         'date_fin' => 'date',
         'date_limite_depot' => 'date',
-        'date_heure' => 'datetime',
         'prix' => 'decimal:2',
+            'date_heure' => 'string', // ou 'datetime:H:i' si tu utilises Carbon
+
     ];
+
+    // Si tu veux garder un format plus lisible de l'heure dans ton JSON
+    protected $appends = ['heure_formate'];
+
+public function getHeureFormateAttribute()
+{
+    return $this->heure ? Carbon::parse($this->heure)->format('H\hi') : null;
+}
+
 
     public function categorie()
     {
