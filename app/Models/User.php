@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;  // Importation de l'interface JWTSubject
+use Tymon\JWTAuth\Contracts\JWTSubject;  
 
-class User extends Authenticatable implements JWTSubject  // Implémentation de JWTSubject
+class User extends Authenticatable implements JWTSubject  
 {
     use HasFactory, Notifiable;
 
@@ -18,8 +18,14 @@ class User extends Authenticatable implements JWTSubject  // Implémentation de 
      */
     protected $fillable = [
         'name',
+        'prenom',
         'email',
         'password',
+        'phone',
+        'address',
+        'role',
+        'image',
+
     ];
 
     /**
@@ -50,7 +56,7 @@ class User extends Authenticatable implements JWTSubject  // Implémentation de 
     public function getJWTCustomClaims()
     {
         return [
-            'role' => $this->role,  // Exemple d'ajout de "role" dans le JWT
+            'role' => $this->role,  // Ajout du rôle dans le token JWT
         ];
     }
 

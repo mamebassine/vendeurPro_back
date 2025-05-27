@@ -17,11 +17,13 @@ return new class extends Migration
             $table->date('date_debut')->nullable(); // Date de début de la formation
             $table->date('date_fin')->nullable(); // Date de fin
             $table->date('date_limite_depot')->nullable(); // Dernier jour de dépôt des candidatures
-            $table->dateTime('date_heure')->nullable(); // Pour les webinaires
+            // $table->dateTime('date_heure')->nullable(); // Pour les webinaires
+           $table->time('heure')->nullable(); // et non plus dateTime
 
             $table->integer('duree')->nullable(); // Durée en jours ou en heures
             $table->decimal('prix', 8, 2)->nullable(); // Tarif
             $table->string('lieu')->nullable(); // En ligne, présentiel...
+            $table->enum('type', ['Bootcamps', 'Formations certifiantes', 'Modules à la carte'])->default('Formations certifiantes');
 
             $table->foreignId('id_categorie')->constrained('categories')->onDelete('cascade'); // Webinaire, coaching, formation...
             
