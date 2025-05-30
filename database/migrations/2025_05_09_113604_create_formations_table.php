@@ -26,7 +26,8 @@ return new class extends Migration
             $table->enum('type', ['Bootcamps', 'Formations certifiantes', 'Modules à la carte'])->default('Formations certifiantes');
 
             $table->foreignId('id_categorie')->constrained('categories')->onDelete('cascade'); // Webinaire, coaching, formation...
-            
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

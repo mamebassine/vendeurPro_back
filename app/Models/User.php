@@ -25,6 +25,7 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'role',
         'image',
+        
 
     ];
 
@@ -72,4 +73,15 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+    public function getImageUrlAttribute()
+{
+    return $this->image ? asset('storage/' . $this->image) : null;
 }
+public function formations()
+{
+    return $this->hasMany(Formation::class);
+}
+
+}
+
+

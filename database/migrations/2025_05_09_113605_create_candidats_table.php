@@ -16,11 +16,9 @@ return new class extends Migration
             $table->string(column: 'nom');
             $table->string(column: 'prenom');
            $table->string('email')->unique();
-           $table->string('telephone')->unique(); // changé de integer à string
+           $table->string('telephone')->unique(); 
            $table->string('adresse');
-            $table->enum('genre', ['homme', 'femme'])->nullable();
-
-
+           $table->enum('genre', ['homme', 'femme'])->nullable();
             $table->timestamps();
         });
     }

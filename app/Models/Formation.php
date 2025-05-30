@@ -16,12 +16,14 @@ class Formation extends Model
         'date_debut',
         'date_fin',
         'date_limite_depot',
-        'heure',      // heure au format "HH:MM:SS"
+        'heure',      
         'duree',
         'prix',
         'lieu',
         'type',
         'id_categorie',
+        'user_id',
+
     ];
 
     protected $casts = [
@@ -30,7 +32,7 @@ class Formation extends Model
         'date_fin' => 'date',
         'date_limite_depot' => 'date',
         'prix' => 'decimal:2',
-            'date_heure' => 'string', // ou 'datetime:H:i' si tu utilises Carbon
+        'date_heure' => 'string', // ou 'datetime:H:i' si tu utilises Carbon
 
     ];
 
@@ -45,6 +47,12 @@ public function getHeureFormateAttribute()
 
     public function categorie()
     {
-        return $this->belongsTo(Categorie::class, 'id_categorie');
+        return $this->belongsTo(Categorie::class, foreignKey: 'id_categorie');
     }
+
+    public function user()
+{
+    return $this->belongsTo(User::class, foreignKey: 'user_id');
+}
+
 }

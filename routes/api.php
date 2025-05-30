@@ -33,14 +33,6 @@ Route::middleware('auth:api')->group(function () {
             Route::put('categories/{id}', [CategorieController::class, 'update']);
             Route::delete('categories/{id}', [CategorieController::class, 'destroy']);
 
-
-            Route::get('candidats', [CandidatController::class, 'index']); 
-            Route::get('candidats/{id}', [CandidatController::class, 'show']); 
-            Route::post('candidats', [CandidatController::class, 'store']);
-            Route::put('candidats/{id}', [CandidatController::class, 'update']);
-            Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
-
-
             Route::get('candidatures', [CandidatureController::class, 'index']); 
             Route::get('candidatures/{id}', [CandidatureController::class, 'show']); 
             Route::post('candidatures', [CandidatureController::class, 'store']);
@@ -48,3 +40,10 @@ Route::middleware('auth:api')->group(function () {
             Route::delete('candidatures/{id}', [CandidatureController::class, 'destroy']);
 
 });
+
+
+            Route::get('candidats', [CandidatController::class, 'index']); 
+            Route::get('candidats/{id}', [CandidatController::class, 'show']); 
+            Route::post('candidats', [CandidatController::class, 'store']);
+            Route::put('candidats/{id}', [CandidatController::class, 'update']);
+            Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
