@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Candidature;
+use App\Models\Candidat;
 use Illuminate\Http\Request;
 
 class CandidatureController extends Controller
@@ -12,24 +13,21 @@ class CandidatureController extends Controller
      */
     public function index()
     {
-        // Tu peux inclure les relations si tu veux : formation et candidat
         $candidatures = Candidature::with(['formation', 'candidat'])->paginate(15);
         return response()->json($candidatures, 200);
     }
 
     /**
-     * Enregistre une nouvelle candidature, après vérification.
+     * Enregistre une nouvelle candidature, après vérification (via admin).
      */
     public function store(Request $request)
     {
-        // Validation des données
         $validated = $request->validate([
             'id_formation' => 'required|exists:formations,id',
             'id_candidat' => 'required|exists:candidats,id',
             'statut' => 'required|in:en attente,acceptée,refusée',
         ]);
 
-        // Vérification d'une candidature existante
         $existing = Candidature::where('id_formation', $validated['id_formation'])
             ->where('id_candidat', $validated['id_candidat'])
             ->first();
@@ -41,9 +39,59 @@ class CandidatureController extends Controller
             ], 200);
         }
 
-        // Création de la candidature
         $candidature = Candidature::create($validated);
         return response()->json($candidature, 201);
+    }
+
+    /**
+     * Enregistrement depuis le formulaire public (sans authentification).
+     */
+    public function storeFromPublic(Request $request)
+    {
+        $validated = $request->validate([
+            'formation_id' => 'required|exists:formations,id',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'telephone' => 'required|string|max:50',
+            'adresse' => 'required|string|max:500',
+            'genre' => 'nullable|in:homme,femme',
+        ]);
+
+        $candidat = Candidat::where('email', $validated['email'])->first();
+
+        if (!$candidat) {
+            $candidat = Candidat::create([
+                'nom' => $validated['nom'],
+                'prenom' => $validated['prenom'],
+                'email' => $validated['email'],
+                'telephone' => $validated['telephone'],
+                'adresse' => $validated['adresse'],
+                'genre' => $validated['genre'] ?? null,
+            ]);
+        }
+
+        $existing = Candidature::where('id_formation', $validated['formation_id'])
+            ->where('id_candidat', $candidat->id)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'message' => 'Vous êtes déjà inscrit à cette formation.',
+                'candidature' => $existing
+            ], 409);
+        }
+
+        $candidature = Candidature::create([
+            'id_formation' => $validated['formation_id'],
+            'id_candidat' => $candidat->id,
+            'statut' => 'en attente',
+        ]);
+
+        return response()->json([
+            'message' => 'Votre inscription a bien été enregistrée.',
+            'candidature' => $candidature
+        ], 201);
     }
 
     /**
@@ -71,14 +119,12 @@ class CandidatureController extends Controller
             return response()->json(['message' => 'Candidature non trouvée'], 404);
         }
 
-        // Validation
         $validated = $request->validate([
             'id_formation' => 'sometimes|exists:formations,id',
             'id_candidat' => 'sometimes|exists:candidats,id',
             'statut' => 'sometimes|in:en attente,acceptée,refusée',
         ]);
 
-        // Vérifier unicité uniquement si id_formation ou id_candidat changent
         if (isset($validated['id_formation']) || isset($validated['id_candidat'])) {
             $formationId = $validated['id_formation'] ?? $candidature->id_formation;
             $candidatId = $validated['id_candidat'] ?? $candidature->id_candidat;
