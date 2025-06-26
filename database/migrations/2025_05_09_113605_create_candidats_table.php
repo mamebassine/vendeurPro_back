@@ -12,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('candidats', function (Blueprint $table) {
-            $table->id();
-            $table->string(column: 'nom');
-            $table->string(column: 'prenom');
-           $table->string('email')->unique();
-           $table->string('telephone')->unique(); // changé de integer à string
-           $table->string('adresse');
-            $table->enum('genre', ['homme', 'femme'])->nullable();
+        $table->id();
+        $table->string(column: 'nom');
+        $table->string(column: 'prenom');
+        $table->string('email')->unique();
+        $table->string('telephone')->unique();
+        $table->string('adresse');
+        $table->enum('genre', ['homme', 'femme'])->nullable();
+        $table->unsignedBigInteger('parrain_id')->nullable();
+        $table->foreign('parrain_id')->references('id')->on('candidats')->onDelete('set null');
+        $table->string('code_parrainage', 6)->unique()->nullable();
 
-
-            $table->timestamps();
+        $table->timestamps();
         });
     }
 

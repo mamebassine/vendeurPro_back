@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Candidat;
+use App\Models\Formation;
+use App\Models\Commission;
 class Candidature extends Model
 {
     use HasFactory;
@@ -28,4 +30,13 @@ class Candidature extends Model
     {
         return $this->belongsTo(Candidat::class, 'id_candidat');
     }
+
+   public function commissionsRecues()
+{
+    return $this->hasMany(Commission::class, 'parrain_id');
+}
+
+public function commission() {
+    return $this->hasOne(Commission::class, 'candidature_id');
+}
 }
