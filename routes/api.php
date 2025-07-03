@@ -24,7 +24,12 @@ Route::post('login', [AuthController::class, 'login'])->name('login');
 // 🔓 Soumission d'une candidature sans avoir de compte utilisateur (ex: visiteur sur le site)
 Route::post('public-candidature', [CandidatureController::class, 'storeFromPublic']);
 
+//ICCI MODIFICATIONNNNNNN
 
+// 🔐 Créer un nouveau candidat
+               Route::post('candidats', [CandidatController::class, 'store']);
+// 🔐 Ajouter une candidature manuellement (par l'admin)
+               Route::post('candidatures', [CandidatureController::class, 'store']);
 
                // 📌 Routes publiques pour consulter les formations
 
@@ -109,8 +114,7 @@ Route::get('formations/{id}', [FormationController::class, 'show']);
                // 🔐 Détail d'un candidat spécifique
                Route::get('candidats/{id}', [CandidatController::class, 'show']);
 
-               // 🔐 Créer un nouveau candidat
-               Route::post('candidats', [CandidatController::class, 'store']);
+               
 
                // 🔐 Modifier un candidat existant
                Route::put('candidats/{id}', [CandidatController::class, 'update']);

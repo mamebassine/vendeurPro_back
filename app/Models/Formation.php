@@ -10,21 +10,11 @@ class Formation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'titre',
-        'description',
-        'date_debut_candidature',
-        'date_debut',
-        'date_fin',
-        'date_limite_depot',
-        'heure',      
-        'duree',
-        'prix',
-        'lieu',
-        'type',
-        'id_categorie',
-        'user_id',
+    'titre', 'description', 'public_vise', 'objectifs', 'format', 'certifiante',
+    'date_debut_candidature', 'date_debut', 'date_fin', 'date_limite_depot', 'heure',
+    'duree', 'prix', 'lieu', 'type', 'id_categorie', 'user_id',
+];
 
-    ];
 
     protected $casts = [
         'date_debut_candidature' => 'date',

@@ -9,29 +9,26 @@ use Illuminate\Http\Request;
 
 class FormationController extends Controller
 {
-    /**
-     * Affiche la liste des formations avec leur catégorie associée.
-     */
     public function index()
     {
-               // Chargement de la catégorie et de l'utilisateur (seulement id et name)
         $formations = Formation::with([
             'categorie:id,nom',
             'user:id,name,prenom'  
         ])->get();
 
         return response()->json($formations, 200);
-
     }
 
-    /**
-     * Enregistre une nouvelle formation.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'titre' => 'required|string',
             'description' => 'required|string',
+            'public_vise' => 'nullable|string',
+            'objectifs' => 'nullable|string',
+            'format' => 'nullable|string',
+            'certifiante' => 'nullable|boolean',
+
             'date_debut_candidature' => 'required|date',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date',
@@ -40,23 +37,20 @@ class FormationController extends Controller
             'duree' => 'required|numeric',
             'prix' => 'required|numeric',
             'lieu' => 'required|string',
-            'type' => 'required|string',
+            'type' => 'required|string|in:Bootcamps,Formations certifiantes,Modules à la carte',
             'id_categorie' => 'required|integer|exists:categories,id',
         ]);
 
         $formation = new Formation($validated);
-        $formation->user_id = Auth::id(); // ✅ corrige l'erreur Intelephense
+        $formation->user_id = Auth::id();
         $formation->save();
 
         return response()->json($formation, 201);
     }
 
-    /**
-     * Affiche une formation spécifique.
-     */
     public function show($id)
     {
- $formation = Formation::with(['categorie:id,nom', 'user:id,name,prenom'])->find($id);
+        $formation = Formation::with(['categorie:id,nom', 'user:id,name,prenom'])->find($id);
 
         if (!$formation) {
             return response()->json(['message' => 'Formation non trouvée'], 404);
@@ -65,9 +59,6 @@ class FormationController extends Controller
         return response()->json($formation, 200);
     }
 
-    /**
-     * Met à jour une formation existante.
-     */
     public function update(Request $request, $id)
     {
         Log::info("Données reçues dans update pour l'ID $id :", $request->all());
@@ -80,6 +71,11 @@ class FormationController extends Controller
         $validated = $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
+            'public_vise' => 'nullable|string',
+            'objectifs' => 'nullable|string',
+            'format' => 'nullable|string',
+            'certifiante' => 'nullable|boolean',
+
             'date_debut_candidature' => 'nullable|date',
             'date_debut' => 'nullable|date',
             'date_fin' => 'nullable|date|after_or_equal:date_debut',
@@ -93,15 +89,12 @@ class FormationController extends Controller
         ]);
 
         $formation->update($validated);
-        $formation->user_id = Auth::id(); 
+        $formation->user_id = Auth::id();
         $formation->save();
 
         return response()->json($formation, 200);
     }
 
-    /**
-     * Supprime une formation.
-     */
     public function destroy($id)
     {
         $formation = Formation::find($id);

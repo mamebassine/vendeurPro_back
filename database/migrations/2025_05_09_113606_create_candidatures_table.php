@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_formation')->constrained('formations')->onDelete('cascade');
             $table->foreignId('id_candidat')->constrained('candidats')->onDelete('cascade');
-            $table->enum('statut', ['en attente', 'acceptée', 'refusée']);
+            $table->enum('statut', allowed: ['en attente', 'acceptée', 'refusée']);
             $table->timestamps();
 
             // ✅ Contrainte pour éviter les doublons d'une même candidature
