@@ -45,4 +45,15 @@ public function getHeureFormateAttribute()
     return $this->belongsTo(User::class, foreignKey: 'user_id');
 }
 
+// public function candidature()
+// {
+//     return $this->hasMany(Candidature::class);
+// }
+
+
+public function candidatures()
+{
+    return $this->hasMany(Candidature::class, 'id_formation', 'id');
+}
+
 }

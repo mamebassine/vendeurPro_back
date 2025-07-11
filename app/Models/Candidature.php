@@ -21,11 +21,11 @@ class Candidature extends Model
 
     public function formation()
     {
-        return $this->belongsTo(Formation::class, 'id_formation');
+    return $this->belongsTo(Formation::class, 'id_formation', 'id');
     }
 
     public function candidat()
     {
-        return $this->belongsTo(Candidat::class, 'id_candidat');
+        return $this->belongsTo(Candidat::class, 'id_candidat', 'id');
     }
 }

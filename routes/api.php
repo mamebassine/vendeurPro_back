@@ -8,7 +8,20 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\CandidatureController;
 use App\Http\Controllers\CategorieController;
 
-          // 📌 Routes d'authentification (publiques)
+use App\Http\Controllers\DashboardController;
+
+use App\Http\Controllers\ActualiteController;
+
+
+
+Route::get('/actualites', [ActualiteController::class, 'index']);           // Lister toutes les actualités
+Route::post('/actualites', [ActualiteController::class, 'store']);          // Créer une nouvelle actualité
+Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // Afficher une actualité spécifique
+Route::put('/actualites/{id}', [ActualiteController::class, 'update']);     // Mettre à jour une actualité
+Route::delete('/actualites/{id}', [ActualiteController::class, 'destroy']); // Supprimer une actualité
+
+
+Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 
 // 🔓 Inscription d'un nouvel utilisateur
@@ -41,7 +54,14 @@ Route::get('formations', [FormationController::class, 'index']);
 Route::get('formations/{id}', [FormationController::class, 'show']);
 
 
-               // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
+// 🔓 Récupérer les formations de type "different" (page formation )
+Route::get('webinaire', [FormationController::class, 'afficherWebinaire']);
+Route::get('coaching', [FormationController::class, 'afficherCoaching']);
+Route::get('formation', [FormationController::class, 'afficherFormations']);
+
+
+
+// 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
                Route::middleware('auth:api')->group(function () {
 
                               // 🔒 Auth connecté
@@ -63,6 +83,12 @@ Route::get('formations/{id}', [FormationController::class, 'show']);
 
                // 🔐 Supprimer une formation
                Route::delete('formations/{id}', [FormationController::class, 'destroy']);
+
+// Création d'un coaching ou d'un webinaire
+Route::post('ajouter-webinaire', [FormationController::class, 'ajouterWebinaire']);
+Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching']);
+              
+
 
 
 
