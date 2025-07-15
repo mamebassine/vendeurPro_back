@@ -39,16 +39,26 @@ class CandidatController extends Controller
     /**
      * Affiche un candidat par son ID.
      */
-    public function show($id)
-    {
-        $candidat = Candidat::find($id);
+    // public function show($id)
+    // {
+    //     $candidat = Candidat::find($id);
 
-        if (!$candidat) {
-            return response()->json(['message' => 'Candidat non trouvé'], 404);
-        }
+    //     if (!$candidat) {
+    //         return response()->json(['message' => 'Candidat non trouvé'], 404);
+    //     }
 
-        return response()->json($candidat, 200);
+    //     return response()->json($candidat, 200);
+    // }
+public function show($id)
+{
+    $candidat = Candidat::with('formations')->find($id);
+
+    if (!$candidat) {
+        return response()->json(['message' => 'Candidat non trouvé'], 404);
     }
+
+    return response()->json($candidat, 200);
+}
 
     /**
      * Met à jour un candidat existant.

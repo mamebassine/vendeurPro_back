@@ -20,6 +20,12 @@ class Candidat extends Model
         'adresse',
         'genre', 
     ];
+public function formations()
+{
+    return $this->belongsToMany(Formation::class, 'candidatures', 'id_candidat', 'id_formation')
+                ->withPivot('statut')
+                ->withTimestamps();
+}
 
    
 }

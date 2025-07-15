@@ -34,8 +34,7 @@ public function getHeureFormateAttribute()
     return $this->heure ? Carbon::parse($this->heure)->format('H\hi') : null;
 }
 
-
-    public function categorie()
+public function categorie()
     {
         return $this->belongsTo(Categorie::class, foreignKey: 'id_categorie');
     }
@@ -45,15 +44,18 @@ public function getHeureFormateAttribute()
     return $this->belongsTo(User::class, foreignKey: 'user_id');
 }
 
-// public function candidature()
-// {
-//     return $this->hasMany(Candidature::class);
-// }
-
-
 public function candidatures()
 {
     return $this->hasMany(Candidature::class, 'id_formation', 'id');
 }
+
+
+public function candidats()
+{
+    return $this->belongsToMany(Candidat::class, 'candidatures', 'id_formation', 'id_candidat')
+                ->withPivot('statut')
+                ->withTimestamps();
+}
+
 
 }
