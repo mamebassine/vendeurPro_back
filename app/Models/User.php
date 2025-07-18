@@ -82,6 +82,14 @@ public function formations()
     return $this->hasMany(Formation::class);
 }
 
+
+// Dans User.php
+public function actualites()
+{
+    return $this->hasMany(Actualite::class);
+}
+
+
 }
 
 

@@ -15,10 +15,8 @@ use App\Http\Controllers\ActualiteController;
 
 
 Route::get('/actualites', [ActualiteController::class, 'index']);           // Lister toutes les actualités
-Route::post('/actualites', [ActualiteController::class, 'store']);          // Créer une nouvelle actualité
 Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // Afficher une actualité spécifique
-Route::put('/actualites/{id}', [ActualiteController::class, 'update']);     // Mettre à jour une actualité
-Route::delete('/actualites/{id}', [ActualiteController::class, 'destroy']); // Supprimer une actualité
+
 
 
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
@@ -65,6 +63,12 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
                Route::middleware('auth:api')->group(function () {
 
                               // 🔒 Auth connecté
+                Route::post('/actualites', [ActualiteController::class, 'store']); // POST OK
+
+                Route::put('/actualites/{id}', [ActualiteController::class, 'update']);     // Mettre à jour une actualité
+                Route::delete('/actualites/{id}', [ActualiteController::class, 'destroy']); // Supprimer une actualité
+
+
 
                // 🔐 Récupérer les informations de l'utilisateur connecté
                Route::get('profile', [AuthController::class, 'profile']);

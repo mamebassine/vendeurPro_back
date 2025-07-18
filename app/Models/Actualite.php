@@ -15,11 +15,20 @@ class Actualite extends Model
     'date_publication',
     'points',
     'conclusion',
+    'user_id',
 ];
 
 protected $casts = [
     'date_publication' => 'datetime',
     'points' => 'array',
 ];
+
+
+
+// Dans Actualite.php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
 
 }

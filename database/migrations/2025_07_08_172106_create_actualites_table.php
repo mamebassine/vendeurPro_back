@@ -21,6 +21,8 @@ return new class extends Migration
         $table->dateTime('date_publication');
         $table->json('points')->nullable(); // liste de blocs
         $table->text('conclusion')->nullable(); // paragraphe final
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // 🔗 Relation avec users
+
         $table->timestamps();
         });
     }
