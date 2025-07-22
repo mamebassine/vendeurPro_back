@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+
 
 class Actualite extends Model
 {
@@ -30,5 +32,13 @@ public function user()
 {
     return $this->belongsTo(User::class);
 }
+
+
+
+public function getDatePublicationFormattedAttribute()
+{
+    return Carbon::parse($this->date_publication)->format('d/m/Y');
+}
+
 
 }

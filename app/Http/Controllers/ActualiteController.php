@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Actualite;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ActualiteController extends Controller
 {
@@ -20,7 +21,7 @@ class ActualiteController extends Controller
 {
     $request->validate([
         'titre' => 'required|string|max:255',
-        'date_publication' => 'required|date',
+        // 'date_publication' => 'required|date',
         'contenu' => 'required|string',
         'auteur' => 'required|string|max:255',
         'fonction' => 'required|string|max:255',
@@ -41,14 +42,16 @@ class ActualiteController extends Controller
 
     $actualite = Actualite::create([
         'titre' => $request->titre,
-        'date_publication' => $request->date_publication,
+        // 'date_publication' => $request->date_publication,
+        'date_publication' => Carbon::now(), // 🔥 ici on met la date automatique
+
         'contenu' => $request->contenu,
         'auteur' => $request->auteur,
         'fonction' => $request->fonction,
         'image' => $imagePath,
         'points' => $request->points,
+        //'points' => $request->points ? json_encode(json_decode($request->points, true)) : null,
         'conclusion' => $request->conclusion,
-
         'user_id' => $user->id,
     ]);
 
@@ -92,7 +95,9 @@ class ActualiteController extends Controller
             'contenu' => $request->contenu,
             'auteur' => $request->auteur,
             'fonction' => $request->fonction,
-            'points' => $request->points,
+             'points' => $request->points,
+            //'points' => $request->points ? json_encode(json_decode($request->points, true)) : null,
+
             'conclusion' => $request->conclusion,
             'image' => $actualite->image,
         ]);

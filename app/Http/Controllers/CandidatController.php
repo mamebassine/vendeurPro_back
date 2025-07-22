@@ -20,21 +20,66 @@ class CandidatController extends Controller
     /**
      * Crée un nouveau candidat.
      */
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'nom' => 'required|string|max:255',
+    //         'prenom' => 'required|string|max:255',
+    //         'email' => 'required|email|unique:candidats,email|max:255',
+    //         'telephone' => 'required|string|unique:candidats,telephone|max:50',
+    //         'adresse' => 'required|string|max:500',
+    //         'genre' => 'nullable|in:homme,femme',
+    //     ]);
+
+    //     $candidat = Candidat::create($validated);
+
+    //     return response()->json($candidat, 201);
+    // }
+
+
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'email' => 'required|email|unique:candidats,email|max:255',
-            'telephone' => 'required|string|unique:candidats,telephone|max:50',
-            'adresse' => 'required|string|max:500',
-            'genre' => 'nullable|in:homme,femme',
-        ]);
+{
+    $validated = $request->validate([
+        'nom' => 'required|string|max:255',
+        'prenom' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'telephone' => 'required|string|max:50',
+        'adresse' => 'required|string|max:500',
+        'genre' => 'nullable|in:homme,femme',
+        'formation_id' => 'nullable|exists:formations,id'
+    ]);
 
-        $candidat = Candidat::create($validated);
+    // Vérifie si un candidat avec même email ou téléphone existe
+    $candidat = Candidat::where('email', $validated['email'])
+                ->orWhere('telephone', $validated['telephone'])
+                ->first();
 
-        return response()->json($candidat, 201);
+    if ($candidat) {
+        // Si une formation est passée, on lie ce candidat à la formation (si ce n’est pas déjà fait)
+        if (isset($validated['formation_id'])) {
+            $candidat->formations()->syncWithoutDetaching([$validated['formation_id']]);
+        }
+
+        return response()->json([
+            'message' => 'Candidat existant relié à la formation.',
+            'candidat' => $candidat
+        ], 200);
     }
+
+    // Sinon, on le crée normalement
+    $nouveauCandidat = Candidat::create($validated);
+
+    // Et on le relie à la formation s’il y en a une
+    if (isset($validated['formation_id'])) {
+        $nouveauCandidat->formations()->attach($validated['formation_id']);
+    }
+
+    return response()->json([
+        'message' => 'Nouveau candidat créé.',
+        'candidat' => $nouveauCandidat
+    ], 201);
+}
+
 
     /**
      * Affiche un candidat par son ID.
