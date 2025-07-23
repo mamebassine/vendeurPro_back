@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Candidature;
 use App\Models\Candidat;
+use App\Models\Commission;
 use Illuminate\Http\Request;
 use App\Notifications\CandidatureReçueNotification;
 use App\Notifications\StatutCandidatureModifie;
-
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CandidatureController extends Controller
 {
@@ -22,29 +24,77 @@ class CandidatureController extends Controller
     }
 
     /**
-     * Enregistre une nouvelle candidature, après vérification (via admin).
+     * Crée une nouvelle candidature + gestion de commission (via admin).
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'id_formation' => 'required|exists:formations,id',
-            'id_candidat' => 'required|exists:candidats,id',
-            'statut' => 'required|in:en attente,acceptée,refusée',
+            'id_candidat'  => 'required|exists:candidats,id',
+            'statut'       => 'required|in:en attente,acceptée,refusée',
+            'pourcentage'  => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $existing = Candidature::where('id_formation', $validated['id_formation'])
-            ->where('id_candidat', $validated['id_candidat'])
-            ->first();
-
-        if ($existing) {
+        // Empêche les doublons
+        if (Candidature::where('id_formation', $data['id_formation'])
+            ->where('id_candidat', $data['id_candidat'])
+            ->exists()
+        ) {
             return response()->json([
-                'message' => 'Candidature déjà existante pour cette formation',
-                'candidature' => $existing
+                'message' => 'Candidature déjà existante pour cette formation.',
             ], 200);
         }
 
-        $candidature = Candidature::create($validated);
-        return response()->json($candidature, 201);
+        DB::beginTransaction();
+
+        try {
+            // Crée la candidature
+            $candidature = Candidature::create([
+                'id_formation' => $data['id_formation'],
+                'id_candidat'  => $data['id_candidat'],
+                'statut'       => $data['statut'],
+            ]);
+            $candidature->load('formation', 'candidat');
+
+            $commission = null;
+
+            // Crée la commission si acceptée et parrainage présent
+            if (
+                $candidature->statut === 'acceptée'
+                && $candidature->formation
+                && ($filleul = $candidature->candidat)
+                && $filleul->parrain_id
+                && isset($data['pourcentage'])
+            ) {
+                $prixFormation = $candidature->formation->prix;
+                $montant = round($prixFormation * $data['pourcentage'] / 100, 2);
+
+                $commission = Commission::create([
+                    'parrain_id'         => $filleul->parrain_id,
+                    'filleul_id'         => $filleul->id,
+                    'candidature_id'     => $candidature->id,
+                    'user_id'            => Auth::id(),
+                    'montant_commission' => $montant,
+                    'date_commission'    => Carbon::now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message'     => 'Candidature créée.' . ($commission ? ' Commission générée.' : ''),
+                'candidature' => $candidature,
+                'commission'  => $commission,
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Erreur lors de la création.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -92,10 +142,7 @@ class CandidatureController extends Controller
             'statut' => 'en attente',
         ]);
 
-        // Charger la relation formation (nécessaire pour le titre)
         $candidature->load('formation');
-
-        // ✅ Envoi de l'e-mail de notification
         $candidat->notify(new CandidatureReçueNotification($candidature->formation->titre));
 
         return response()->json([
@@ -119,92 +166,79 @@ class CandidatureController extends Controller
     }
 
     /**
-     * Met à jour une candidature existante.
+     * Met à jour une candidature + commission.
      */
-public function update(Request $request, $id)
-{
-    $candidature = Candidature::find($id);
+    public function update(Request $request, $id)
+    {
+        $candidature = Candidature::with(['formation', 'candidat'])->find($id);
 
-    if (!$candidature) {
-        return response()->json(['message' => 'Candidature non trouvée'], 404);
-    }
+        if (!$candidature) {
+            return response()->json(['message' => 'Candidature non trouvée'], 404);
+        }
 
-    $validated = $request->validate([
-        'id_formation' => 'sometimes|exists:formations,id',
-        'id_candidat' => 'sometimes|exists:candidats,id',
-        'statut' => 'sometimes|in:en attente,acceptée,refusée',
-    ]);
+        $data = $request->validate([
+            'statut'      => 'sometimes|required|string|in:en attente,acceptée,refusée',
+            'pourcentage' => 'nullable|numeric|min:0|max:100',
+        ]);
 
-    $ancienStatut = $candidature->statut;
+        $ancienStatut = $candidature->statut;
 
-    // Vérifier doublon
-    if (isset($validated['id_formation']) || isset($validated['id_candidat'])) {
-        $formationId = $validated['id_formation'] ?? $candidature->id_formation;
-        $candidatId = $validated['id_candidat'] ?? $candidature->id_candidat;
+        DB::beginTransaction();
 
-        $existing = Candidature::where('id_formation', $formationId)
-            ->where('id_candidat', $candidatId)
-            ->where('id', '!=', $id)
-            ->first();
+        try {
+            if (isset($data['statut'])) {
+                $candidature->statut = $data['statut'];
+            }
+            $candidature->save();
 
-        if ($existing) {
+            $commission = null;
+
+            if (
+                $candidature->statut === 'acceptée'
+                && $candidature->formation
+                && ($filleul = $candidature->candidat)
+                && $filleul->parrain_id
+                && isset($data['pourcentage'])
+            ) {
+                $prixFormation = $candidature->formation->prix;
+                $montant = round($prixFormation * $data['pourcentage'] / 100, 2);
+
+                $commission = Commission::updateOrCreate(
+                    ['candidature_id' => $candidature->id],
+                    [
+                        'parrain_id'         => $filleul->parrain_id,
+                        'filleul_id'         => $filleul->id,
+                        'user_id'            => Auth::id(),
+                        'montant_commission' => $montant,
+                        'date_commission'    => Carbon::now(),
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            // Notification de changement de statut
+            if (isset($data['statut']) && $data['statut'] !== $ancienStatut) {
+                $candidat = $candidature->candidat;
+                if ($candidat) {
+                    $candidat->notify(new StatutCandidatureModifie($data['statut']));
+                }
+            }
+
             return response()->json([
-                'message' => 'Une autre candidature existe déjà pour ce candidat et cette formation',
-                'candidature' => $existing
-            ], 409);
+                'message'     => 'Candidature mise à jour.' . ($commission ? ' Commission mise à jour.' : ''),
+                'candidature' => $candidature,
+                'commission'  => $commission,
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour.',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
     }
-
-    $candidature->update($validated);
-
-    // Si le statut a changé, envoyer un mail
-    if (isset($validated['statut']) && $validated['statut'] !== $ancienStatut) {
-        $candidat = $candidature->candidat; // relation "candidat" (avec with si besoin)
-        if ($candidat && $candidat->email) {
-            $candidat->notify(new StatutCandidatureModifie($validated['statut']));
-        }
-    }
-
-    return response()->json($candidature, 200);
-}
-
-
-// ANCIEN MODIFICATION (COMMENTEE CI-)
-
-    // public function update(Request $request, $id)
-    // {
-    //     $candidature = Candidature::find($id);
-
-    //     if (!$candidature) {
-    //         return response()->json(['message' => 'Candidature non trouvée'], 404);
-    //     }
-
-    //     $validated = $request->validate([
-    //         'id_formation' => 'sometimes|exists:formations,id',
-    //         'id_candidat' => 'sometimes|exists:candidats,id',
-    //         'statut' => 'sometimes|in:en attente,acceptée,refusée',
-    //     ]);
-
-    //     if (isset($validated['id_formation']) || isset($validated['id_candidat'])) {
-    //         $formationId = $validated['id_formation'] ?? $candidature->id_formation;
-    //         $candidatId = $validated['id_candidat'] ?? $candidature->id_candidat;
-
-    //         $existing = Candidature::where('id_formation', $formationId)
-    //             ->where('id_candidat', $candidatId)
-    //             ->where('id', '!=', $id)
-    //             ->first();
-
-    //         if ($existing) {
-    //             return response()->json([
-    //                 'message' => 'Une autre candidature existe déjà pour ce candidat et cette formation',
-    //                 'candidature' => $existing
-    //             ], 409);
-    //         }
-    //     }
-
-    //     $candidature->update($validated);
-    //     return response()->json($candidature, 200);
-    // }
 
     /**
      * Supprime une candidature.

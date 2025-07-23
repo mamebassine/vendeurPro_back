@@ -12,101 +12,64 @@ class CandidatController extends Controller
      */
     public function index()
     {
-        // Pagination pour limiter la quantité de données retournées
         $candidats = Candidat::paginate(5);
         return response()->json($candidats, 200);
     }
 
     /**
-     * Crée un nouveau candidat.
+     * Crée un nouveau candidat avec logique de parrainage et relation formation.
      */
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'nom' => 'required|string|max:255',
-    //         'prenom' => 'required|string|max:255',
-    //         'email' => 'required|email|unique:candidats,email|max:255',
-    //         'telephone' => 'required|string|unique:candidats,telephone|max:50',
-    //         'adresse' => 'required|string|max:500',
-    //         'genre' => 'nullable|in:homme,femme',
-    //     ]);
-
-    //     $candidat = Candidat::create($validated);
-
-    //     return response()->json($candidat, 201);
-    // }
-
-
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'nom' => 'required|string|max:255',
-        'prenom' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'telephone' => 'required|string|max:50',
-        'adresse' => 'required|string|max:500',
-        'genre' => 'nullable|in:homme,femme',
-        'formation_id' => 'nullable|exists:formations,id'
-    ]);
+    {
+        // Validation des champs
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:candidats,email',
+            'telephone' => 'required|string|max:50|unique:candidats,telephone',
+            'adresse' => 'required|string|max:500',
+            'genre' => 'nullable|in:homme,femme',
+            'formation_id' => 'nullable|exists:formations,id',
+            'code_parrain' => 'nullable|string|size:6|exists:candidats,code_parrainage', // parrainage
+        ]);
 
-    // Vérifie si un candidat avec même email ou téléphone existe
-    $candidat = Candidat::where('email', $validated['email'])
-                ->orWhere('telephone', $validated['telephone'])
-                ->first();
+        // Création du candidat
+        $candidat = new Candidat($validated);
 
-    if ($candidat) {
-        // Si une formation est passée, on lie ce candidat à la formation (si ce n’est pas déjà fait)
+        // Gestion du parrainage
+        if ($request->filled('code_parrain')) {
+            $parrain = Candidat::where('code_parrainage', $request->code_parrain)->first();
+            if ($parrain) {
+                $candidat->parrain_id = $parrain->id;
+            }
+        }
+
+        $candidat->save();
+
+        // Lier une formation si présente
         if (isset($validated['formation_id'])) {
-            $candidat->formations()->syncWithoutDetaching([$validated['formation_id']]);
+            $candidat->formations()->attach($validated['formation_id']);
         }
 
         return response()->json([
-            'message' => 'Candidat existant relié à la formation.',
+            'message' => 'Candidat enregistré avec succès.',
             'candidat' => $candidat
-        ], 200);
+        ], 201);
     }
-
-    // Sinon, on le crée normalement
-    $nouveauCandidat = Candidat::create($validated);
-
-    // Et on le relie à la formation s’il y en a une
-    if (isset($validated['formation_id'])) {
-        $nouveauCandidat->formations()->attach($validated['formation_id']);
-    }
-
-    return response()->json([
-        'message' => 'Nouveau candidat créé.',
-        'candidat' => $nouveauCandidat
-    ], 201);
-}
-
 
     /**
-     * Affiche un candidat par son ID.
+     * Affiche un candidat par son ID (avec ses formations).
      */
-    // public function show($id)
-    // {
-    //     $candidat = Candidat::find($id);
-
-    //     if (!$candidat) {
-    //         return response()->json(['message' => 'Candidat non trouvé'], 404);
-    //     }
-
-    //     return response()->json($candidat, 200);
-    // }
-public function show($id)
-{
-    $candidat = Candidat::with('formations')->find($id);
-
-    if (!$candidat) {
-        return response()->json(['message' => 'Candidat non trouvé'], 404);
+    public function show($id)
+    {
+        $candidat = Candidat::with('formations')->find($id);
+        return $candidat 
+            ? response()->json($candidat, 200)
+            : response()->json(['message' => 'Candidat non trouvé'], 404);
     }
 
-    return response()->json($candidat, 200);
-}
-
     /**
-     * Met à jour un candidat existant.
+     * Met à jour un candidat existant (avec parrainage).
      */
     public function update(Request $request, $id)
     {
@@ -116,18 +79,32 @@ public function show($id)
             return response()->json(['message' => 'Candidat non trouvé'], 404);
         }
 
+        // Validation des champs
         $validated = $request->validate([
             'nom' => 'sometimes|required|string|max:255',
             'prenom' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:candidats,email,' . $id . '|max:255',
-            'telephone' => 'sometimes|required|string|unique:candidats,telephone,' . $id . '|max:50',
+            'email' => 'sometimes|required|email|max:255|unique:candidats,email,' . $id,
+            'telephone' => 'sometimes|required|string|max:50|unique:candidats,telephone,' . $id,
             'adresse' => 'sometimes|required|string|max:500',
             'genre' => 'nullable|in:homme,femme',
+            'code_parrain' => 'nullable|string|size:6|exists:candidats,code_parrainage',
         ]);
 
         $candidat->update($validated);
 
-        return response()->json($candidat, 200);
+        // Mise à jour du parrainage
+        if ($request->filled('code_parrain')) {
+            $parrain = Candidat::where('code_parrainage', $request->code_parrain)->first();
+            if ($parrain) {
+                $candidat->parrain_id = $parrain->id;
+                $candidat->save();
+            }
+        }
+
+        return response()->json([
+            'message' => 'Candidat mis à jour avec succès.',
+            'candidat' => $candidat
+        ], 200);
     }
 
     /**
