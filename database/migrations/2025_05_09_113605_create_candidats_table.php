@@ -12,16 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('candidats', function (Blueprint $table) {
-<<<<<<< HEAD
-            $table->id();
-            $table->string(column: 'nom');
-            $table->string(column: 'prenom');
-           $table->string('email')->unique();
-           $table->string('telephone')->unique(); 
-           $table->string('adresse');
-           $table->enum('genre', ['homme', 'femme'])->nullable();
-            $table->timestamps();
-=======
         $table->id();
         $table->string(column: 'nom');
         $table->string(column: 'prenom');
@@ -34,7 +24,6 @@ return new class extends Migration
         $table->string('code_parrainage', 6)->unique()->nullable();
 
         $table->timestamps();
->>>>>>> feature/jeannevendeurPro
         });
     }
 
