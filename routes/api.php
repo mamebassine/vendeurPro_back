@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 
 use App\Http\Controllers\ActualiteController;
 
+use App\Http\Controllers\CommissionController;
 
 
 Route::get('/actualites', [ActualiteController::class, 'index']);           // Lister toutes les actualités
@@ -22,11 +23,16 @@ Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // A
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 
+
 // 🔓 Inscription d'un nouvel utilisateur
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register', action: [AuthController::class, 'register']);
+
+Route::get('users', [AuthController::class, 'userList']);
+
+
 
 // 🔓 Connexion d'un utilisateur (retourne un token)
-Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('login', action: [AuthController::class, 'login'])->name('login');
 
 
           // 📌 Route publique pour candidater à une formation sans compte
@@ -61,6 +67,17 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
 
 // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
                Route::middleware('auth:api')->group(function () {
+Route::post('/commissions', [CommissionController::class, 'store']);
+
+Route::get('/commissions', [CommissionController::class, 'index']);
+Route::get('/commissions/{id}', [CommissionController::class, 'show']);
+Route::post('/commissions/{id}/valider', [CommissionController::class, 'valider']);
+Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
+
+
+Route::get('/commissions/status-count', [CommissionController::class, 'countByStatus']);
+Route::get('/commissions/montants-total', [CommissionController::class, 'sumMontantByStatus']);
+
 
                               // 🔒 Auth connecté
                 Route::post('/actualites', [ActualiteController::class, 'store']); // POST OK
@@ -162,45 +179,3 @@ Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching'])
 
 
 
-// Route::post('register', [AuthController::class, 'register']);
-// Route::post('login', [AuthController::class, 'login'])->name('login');
-
-
-// Route::post('public-candidature', [CandidatureController::class, 'storeFromPublic']);
-
-//             Route::get('candidats', [CandidatController::class, 'index']); 
-//             Route::get('candidats/{id}', [CandidatController::class, 'show']); 
-//             Route::post('candidats', [CandidatController::class, 'store']);
-//             Route::put('candidats/{id}', [CandidatController::class, 'update']);
-//             Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
-
-
-//             Route::get('candidatures', [CandidatureController::class, 'index']); 
-//             Route::get('candidatures/{id}', [CandidatureController::class, 'show']); 
-//             Route::post('candidatures', [CandidatureController::class, 'store']);
-//             Route::put('candidatures/{id}', [CandidatureController::class, 'update']); 
-//             Route::delete('candidatures/{id}', [CandidatureController::class, 'destroy']);
-
-
-
-// Route::middleware('auth:api')->group(function () {
-//                 Route::get('profile', [AuthController::class, 'profile']);
-//                 Route::post('logout', [AuthController::class, 'logout']);
-
-            
-//            Route::get('formations', [FormationController::class, 'index']); 
-//             Route::get('formations/{id}', [FormationController::class, 'show']); 
-//             Route::post('formations', [FormationController::class, 'store']); 
-//             Route::put('formations/{id}', [FormationController::class, 'update']); 
-//             Route::delete('formations/{id}', [FormationController::class, 'destroy']); 
-
-
-//             Route::get('categories', [CategorieController::class, 'index']);
-//             Route::get('categories/{id}', [CategorieController::class, 'show']);
-//             Route::post('categories', [CategorieController::class, 'store']);
-//             Route::put('categories/{id}', [CategorieController::class, 'update']);
-//             Route::delete('categories/{id}', [CategorieController::class, 'destroy']);
-// });
-
-
-         

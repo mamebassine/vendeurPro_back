@@ -25,8 +25,7 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'role',
         'image',
-        
-
+        'code_parrainage',  // Code de parrainage unique
     ];
 
     /**
@@ -82,14 +81,29 @@ public function formations()
     return $this->hasMany(Formation::class);
 }
 
+// Formations créées par un admin
+public function formationsCreees()
+{
+    return $this->hasMany(Formation::class, 'user_id');
+}
+
+// Candidatures liées à ce parrain
+public function candidaturesParrain()
+{
+    return $this->hasMany(Candidature::class, 'code_parrainage', 'code_parrainage');
+}
 
 // Dans User.php
 public function actualites()
 {
     return $this->hasMany(Actualite::class);
 }
+// Commissions qu’il a validées (admin)
+    public function commissionsValidees()
+    {
+        return $this->hasMany(Commission::class, 'user_id');
+    }
 
-
-}
+ }
 
 

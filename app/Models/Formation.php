@@ -38,11 +38,15 @@ public function categorie()
     {
         return $this->belongsTo(Categorie::class, foreignKey: 'id_categorie');
     }
+// Admin qui a créé la formation
 
     public function user()
 {
     return $this->belongsTo(User::class, foreignKey: 'user_id');
 }
+
+
+// Toutes les candidatures pour cette formation
 
 public function candidatures()
 {

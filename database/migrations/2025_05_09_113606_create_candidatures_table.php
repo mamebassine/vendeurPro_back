@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_formation')->constrained('formations')->onDelete('cascade');
             $table->foreignId('id_candidat')->constrained('candidats')->onDelete('cascade');
+            $table->string('code_parrainage', 12)->nullable();
+
             $table->enum('statut', allowed: ['en attente', 'acceptée', 'refusée']);
             $table->timestamps();
 
