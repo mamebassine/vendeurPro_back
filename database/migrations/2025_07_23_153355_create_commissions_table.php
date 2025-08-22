@@ -12,8 +12,9 @@ return new class extends Migration {
         Schema::create('commissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('candidature_id')->constrained('candidatures')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null'); // Admin valideur
             $table->decimal('montant_commission', 8, 2)->default(0);
-            $table->string('code_parrainage'); // lien ou code de parrainage
+            $table->string('code_parrainage')->nullable(); // lien ou code de parrainage
             $table->boolean('commission_versee')->default(false);
             $table->timestamps();
         });

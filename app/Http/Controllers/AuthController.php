@@ -12,11 +12,96 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-
-
 class AuthController extends Controller
 {
-    // Méthode pour inscrire un utilisateur
+/**
+     * Liste globale des candidats parrainés par tous les users (parrain)
+     */
+    public function listeCandidatsParraines()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+    
+        if ($user->role !== 'user') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé.'
+            ], 403);
+        }
+    
+        $parrain = User::with([
+            'candidaturesParrain.candidat',
+            'candidaturesParrain.formation',
+            'commissions' // On ajoute les commissions
+
+        ])->find($user->id);
+    
+// Calcul du solde total des commissions
+//$solde = $parrain->commissions->where('commission_versee', false)->sum('montant_commission');
+$solde = $user->commissions->where('commission_versee', false)->sum('montant_commission');
+
+     return response()->json([
+            'success' => true,
+            'users' => [[
+                'id' => $parrain->id,
+                'name' => $parrain->name,
+                'prenom' => $parrain->prenom,
+                'solde' => $solde,
+
+                'candidatures_parrain' => $parrain->candidaturesParrain
+            ]]
+        ]);
+    }
+    
+    /**
+ * Liste des candidats parrainés par un user précis (uniquement rôle user)
+ */
+// public function candidatsParrainParUser($userId)
+// {
+//     $user = User::where('role', 'user') // On filtre uniquement les parrains
+//         ->with([
+//             'candidaturesParrain.candidat',
+//             'candidaturesParrain.formation',
+//             'commissions'
+
+//         ])
+//         ->findOrFail($userId);
+
+//         $solde = $user->commissions->where('commission_versee', false)->sum('montant_commission');
+
+// return response()->json([
+//         'success' => true,
+//         'parrain' => $user->name . ' ' . $user->prenom,
+//         'solde' => $solde,
+
+//         'candidats' => $user->candidaturesParrain
+//     ]);
+// }
+
+
+
+public function candidatsParrainParUser($userId)
+{
+    $user = User::where('role', 'user')
+        ->with(['candidaturesParrain', 'commissions'])
+        ->findOrFail($userId);
+
+    $solde = $user->commissions->where('commission_versee', false)->sum('montant_commission');
+    $total_commissions = $user->commissions->sum('montant_commission');
+
+    return response()->json([
+        'success' => true,
+        'parrain' => $user->name . ' ' . $user->prenom,
+        'solde_commissions_non_versees' => $solde,
+        'total_commissions' => $total_commissions,
+        'candidats' => $user->candidaturesParrain
+    ]);
+}
+
+
+
+
+
+// Méthode pour inscrire un utilisateur
     public function register(Request $request)
     {
         // Validation des données avec messages personnalisés
@@ -169,9 +254,9 @@ public function userList()
 {
     $users = User::where('role', 'user')
         ->with([
-            'formationsCreees.candidatures.candidat',
             'candidaturesParrain.formation',
-            'candidaturesParrain.candidat'
+            'candidaturesParrain.candidat',
+            'candidaturesParrain.commissions'
         ])
         ->get();
 
@@ -180,5 +265,6 @@ public function userList()
         'users' => $users
     ]);
 }
+
 
 }

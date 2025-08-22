@@ -36,12 +36,7 @@ class Candidature extends Model
 
         // return $this->belongsTo(User::class, 'id_user', 'id');
     }
-
-
-
-
-
-    public function commission()
+public function commissions()
     {
         return $this->hasOne(Commission::class); // Une candidature a une seule commission
     }

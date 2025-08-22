@@ -26,6 +26,8 @@ class User extends Authenticatable implements JWTSubject
         'role',
         'image',
         'code_parrainage',  // Code de parrainage unique
+        'solde',
+
     ];
 
     /**
@@ -103,6 +105,20 @@ public function actualites()
     {
         return $this->hasMany(Commission::class, 'user_id');
     }
+
+
+
+    public function commissionsParrain()
+{
+    return $this->hasMany(Commission::class, 'code_parrainage', 'code_parrainage');
+}
+// Commissions liées à ce parrain via son code de parrainage
+public function commissions()
+{
+    return $this->hasMany(Commission::class, 'code_parrainage', 'code_parrainage');
+}
+
+
 
  }
 

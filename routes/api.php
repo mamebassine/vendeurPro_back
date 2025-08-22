@@ -18,25 +18,15 @@ use App\Http\Controllers\CommissionController;
 Route::get('/actualites', [ActualiteController::class, 'index']);           // Lister toutes les actualités
 Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // Afficher une actualité spécifique
 
-
-
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
-
-
 
 // 🔓 Inscription d'un nouvel utilisateur
 Route::post('register', action: [AuthController::class, 'register']);
 
-Route::get('users', [AuthController::class, 'userList']);
-
-
-
 // 🔓 Connexion d'un utilisateur (retourne un token)
 Route::post('login', action: [AuthController::class, 'login'])->name('login');
 
-
-          // 📌 Route publique pour candidater à une formation sans compte
-
+       // 📌 Route publique pour candidater à une formation sans compte
 
 // 🔓 Soumission d'une candidature sans avoir de compte utilisateur (ex: visiteur sur le site)
 Route::post('public-candidature', [CandidatureController::class, 'storeFromPublic']);
@@ -67,19 +57,38 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
 
 // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
                Route::middleware('auth:api')->group(function () {
+
+       // Liste globale des candidats parrainés
+       Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);
+
+       // Liste des candidats parrainés par un user spécifique
+       Route::get('/candidats-parrain/{userId}', [AuthController::class, 'candidatsParrainParUser']);
+
+   Route::get('users', [AuthController::class, 'userList']);
+
+
+   // Liste des commissions
+
+                 // Liste des commissions (admin)
+Route::get('/commissions', [CommissionController::class, 'listeCommissions']);
+
+                 //Liste des commissions du parrain connecté
+Route::get('/mes-commissions', [CommissionController::class, 'mesCommissions']);
+ 
+
+// Création
 Route::post('/commissions', [CommissionController::class, 'store']);
 
-Route::get('/commissions', [CommissionController::class, 'index']);
+// Détail d'une commission
 Route::get('/commissions/{id}', [CommissionController::class, 'show']);
-Route::post('/commissions/{id}/valider', [CommissionController::class, 'valider']);
+
+// Validation par l'admin
+Route::post('/commissions/{id}/valider', [CommissionController::class, 'validerCommission']);
+
+// Suppression
 Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
 
-
-Route::get('/commissions/status-count', [CommissionController::class, 'countByStatus']);
-Route::get('/commissions/montants-total', [CommissionController::class, 'sumMontantByStatus']);
-
-
-                              // 🔒 Auth connecté
+// 🔒 Auth connecté
                 Route::post('/actualites', [ActualiteController::class, 'store']); // POST OK
 
                 Route::put('/actualites/{id}', [ActualiteController::class, 'update']);     // Mettre à jour une actualité
@@ -168,7 +177,8 @@ Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching'])
 
                // 🔐 Supprimer un candidat
                Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
-               });
+               
+            });
 
 
 

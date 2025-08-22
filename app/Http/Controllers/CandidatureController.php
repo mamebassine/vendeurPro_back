@@ -223,6 +223,7 @@ public function update(Request $request, $id)
                 // Trouver le parrain via code_parrainage
                 $parrain = null;
                 if ($candidat->code_parrainage) {
+                    
                     $parrain = Candidat::where('code_parrainage', $candidat->code_parrainage)
                                 ->where('id', '!=', $candidat->id)
                                 ->first();
@@ -299,4 +300,9 @@ public function update(Request $request, $id)
         $candidature->delete();
         return response()->json(['message' => 'Candidature supprimée avec succès'], 200);
     }
+
+
+
+
+    
 }
