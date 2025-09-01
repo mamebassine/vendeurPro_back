@@ -11,7 +11,7 @@ class Commission extends Model
 
     protected $fillable = [
         'candidature_id',
-        'user_id', // Ajout valideur admin
+        'user_id', 
 
         'montant_commission',
         'code_parrainage',
@@ -27,5 +27,5 @@ public function valideur()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+
 }

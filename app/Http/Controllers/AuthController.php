@@ -17,68 +17,6 @@ class AuthController extends Controller
 /**
      * Liste globale des candidats parrainés par tous les users (parrain)
      */
-    public function listeCandidatsParraines()
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-    
-        if ($user->role !== 'user') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Accès refusé.'
-            ], 403);
-        }
-    
-        $parrain = User::with([
-            'candidaturesParrain.candidat',
-            'candidaturesParrain.formation',
-            'commissions' // On ajoute les commissions
-
-        ])->find($user->id);
-    
-// Calcul du solde total des commissions
-//$solde = $parrain->commissions->where('commission_versee', false)->sum('montant_commission');
-$solde = $user->commissions->where('commission_versee', false)->sum('montant_commission');
-
-     return response()->json([
-            'success' => true,
-            'users' => [[
-                'id' => $parrain->id,
-                'name' => $parrain->name,
-                'prenom' => $parrain->prenom,
-                'solde' => $solde,
-
-                'candidatures_parrain' => $parrain->candidaturesParrain
-            ]]
-        ]);
-    }
-    
-    /**
- * Liste des candidats parrainés par un user précis (uniquement rôle user)
- */
-// public function candidatsParrainParUser($userId)
-// {
-//     $user = User::where('role', 'user') // On filtre uniquement les parrains
-//         ->with([
-//             'candidaturesParrain.candidat',
-//             'candidaturesParrain.formation',
-//             'commissions'
-
-//         ])
-//         ->findOrFail($userId);
-
-//         $solde = $user->commissions->where('commission_versee', false)->sum('montant_commission');
-
-// return response()->json([
-//         'success' => true,
-//         'parrain' => $user->name . ' ' . $user->prenom,
-//         'solde' => $solde,
-
-//         'candidats' => $user->candidaturesParrain
-//     ]);
-// }
-
-
-
 public function candidatsParrainParUser($userId)
 {
     $user = User::where('role', 'user')
@@ -97,6 +35,70 @@ public function candidatsParrainParUser($userId)
     ]);
 }
 
+// public function listeCandidatsParraines(Request $request)
+// {
+//     $users = User::with(['candidaturesParrain.candidat', 'candidaturesParrain.formation'])
+//         ->whereHas('candidaturesParrain')
+//         ->get();
+
+//     return response()->json([
+//         'success' => true,
+//         'users' => $users
+//     ]);
+// }
+// public function listeCandidatsParraines(Request $request)
+// {
+//     // Authentifier l'utilisateur connecté
+//     $user = JWTAuth::parseToken()->authenticate();
+
+//     // Vérifier que l'utilisateur est un parrain
+//     if ($user->role !== 'user') {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Accès non autorisé. Seuls les parrains peuvent accéder à cette ressource.'
+//         ], 403);
+//     }
+
+//     // Charger uniquement ses candidatures parrainées
+//     $user->load([
+//         'candidaturesParrain.candidat',
+//         'candidaturesParrain.formation',
+//     ]);
+
+//     return response()->json([
+//         'success' => true,
+//         'users' => [$user] // tableau avec un seul parrain et ses filleuls
+//     ]);
+// }
+
+
+// Liste des candidats parrainés par l'utilisateur connecté
+public function listeCandidatsParraines(Request $request)
+{
+    // Authentifier l'utilisateur connecté avec le token
+    $user = JWTAuth::parseToken()->authenticate();
+
+    // Vérifier que l'utilisateur est bien un parrain
+    if ($user->role !== 'user') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Accès non autorisé. Seuls les parrains peuvent accéder à cette ressource.'
+        ], 403);
+    }
+
+    // Charger uniquement ses candidatures parrainées
+    $user->load([
+        'candidaturesParrain.candidat',
+        'candidaturesParrain.formation',
+        'candidaturesParrain.commissions'
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'parrain' => $user->name . ' ' . $user->prenom,
+        'fillieuls' => $user->candidaturesParrain
+    ]);
+}
 
 
 

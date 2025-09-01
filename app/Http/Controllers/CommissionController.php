@@ -67,7 +67,7 @@ class CommissionController extends Controller
         ]);
     }
 
-    /**
+ /**
      * Afficher une commission par ID
      */
     public function show($id)
@@ -146,6 +146,21 @@ class CommissionController extends Controller
     /**
  * Montant total des commissions pour le parrain connecté
  */
+// public function montantTotalMesCommissions()
+// {
+//     $user = Auth::user();
+
+//     // Somme des commissions liées à ce parrain
+//     $total = Commission::whereHas('candidature', function ($query) use ($user) {
+//         $query->where('code_parrainage', $user->code_parrainage);
+//     })->sum('montant_commission');
+
+//     return response()->json([
+//         'success' => true,
+//         'montant_total' => $total
+//     ]);
+// }
+
 public function montantTotalMesCommissions()
 {
     $user = Auth::user();

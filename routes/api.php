@@ -58,13 +58,14 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
 // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
                Route::middleware('auth:api')->group(function () {
 
-       // Liste globale des candidats parrainés
+    // Chaque parrain connecté voit seulement ses propres filleuls
        Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);
 
        // Liste des candidats parrainés par un user spécifique
-       Route::get('/candidats-parrain/{userId}', [AuthController::class, 'candidatsParrainParUser']);
+       //Route::get('/candidats-parrain/{userId}', [AuthController::class, 'candidatsParrainParUser']);
 
-   Route::get('users', [AuthController::class, 'userList']);
+    // (optionnel) Liste des users parrains si besoin en admin
+Route::get('users', [AuthController::class, 'userList']);
 
 
    // Liste des commissions
@@ -72,18 +73,21 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
                  // Liste des commissions (admin)
 Route::get('/commissions', [CommissionController::class, 'listeCommissions']);
 
-                 //Liste des commissions du parrain connecté
+        //Liste des commissions du parrain connecté
 Route::get('/mes-commissions', [CommissionController::class, 'mesCommissions']);
- 
+
+// Validation par l'admin
+Route::post('/commissions/{id}/valider', [CommissionController::class, 'validerCommission']);
+
+// Montant total des commissions pour le parrain connecté
+Route::get('/mes-commissions/total', [CommissionController::class, 'montantTotalMesCommissions']);
+
 
 // Création
 Route::post('/commissions', [CommissionController::class, 'store']);
 
 // Détail d'une commission
 Route::get('/commissions/{id}', [CommissionController::class, 'show']);
-
-// Validation par l'admin
-Route::post('/commissions/{id}/valider', [CommissionController::class, 'validerCommission']);
 
 // Suppression
 Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
@@ -102,7 +106,7 @@ Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
                // 🔐 Déconnexion de l'utilisateur (invalide le token)
                Route::post('logout', [AuthController::class, 'logout']);
 
-               
+
                               // 🔒 Gestion des formations (admin ou staff connecté uniquement)
 
                // 🔐 Créer une nouvelle formation
@@ -117,12 +121,12 @@ Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
 // Création d'un coaching ou d'un webinaire
 Route::post('ajouter-webinaire', [FormationController::class, 'ajouterWebinaire']);
 Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching']);
-              
 
 
 
 
-               
+
+
                               // 🔒 Gestion des catégories (admin uniquement)
 
                // 🔐 Lister toutes les catégories
@@ -142,7 +146,7 @@ Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching'])
 
 
 
-               
+
                          // 🔒 Gestion des candidatures (consultation et gestion par admin uniquement)
 
                // 🔐 Lister toutes les candidatures reçues
@@ -170,15 +174,16 @@ Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching'])
                // 🔐 Détail d'un candidat spécifique
                Route::get('candidats/{id}', [CandidatController::class, 'show']);
 
-               
+
 
                // 🔐 Modifier un candidat existant
                Route::put('candidats/{id}', [CandidatController::class, 'update']);
 
                // 🔐 Supprimer un candidat
                Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
-               
+
             });
+
 
 
 
