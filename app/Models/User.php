@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;  
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject  
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
@@ -25,6 +25,8 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'role',
         'image',
+        'code_parrainage',  // Code de parrainage unique
+        'solde',
 
     ];
 
@@ -72,4 +74,52 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+    public function getImageUrlAttribute()
+{
+    return $this->image ? asset('storage/' . $this->image) : null;
 }
+public function formations()
+{
+    return $this->hasMany(Formation::class);
+}
+
+// Formations créées par un admin
+public function formationsCreees()
+{
+    return $this->hasMany(Formation::class, 'user_id');
+}
+
+// Candidatures liées à ce parrain
+public function candidaturesParrain()
+{
+    return $this->hasMany(Candidature::class, 'code_parrainage', 'code_parrainage');
+}
+
+// Dans User.php
+public function actualites()
+{
+    return $this->hasMany(Actualite::class);
+}
+// Commissions qu’il a validées (admin)
+    public function commissionsValidees()
+    {
+        return $this->hasMany(Commission::class, 'user_id');
+    }
+
+
+
+    public function commissionsParrain()
+{
+    return $this->hasMany(Commission::class, 'code_parrainage', 'code_parrainage');
+}
+// Commissions liées à ce parrain via son code de parrainage
+public function commissions()
+{
+    return $this->hasMany(Commission::class, 'code_parrainage', 'code_parrainage');
+}
+
+
+
+ }
+
+

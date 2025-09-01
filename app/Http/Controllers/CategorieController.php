@@ -38,6 +38,6 @@ class CategorieController extends Controller
     {
         $categorie = Categorie::findOrFail($id);
         $categorie->delete();
-        return response()->json(['message' => 'Catégorie supprimée avec succès']);
+        return response()->json(['message' => 'Catégorie supprimée avec succès avec la méthode destroy']);
     }
 }

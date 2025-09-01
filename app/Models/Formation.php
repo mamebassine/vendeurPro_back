@@ -10,19 +10,11 @@ class Formation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'titre',
-        'description',
-        'date_debut_candidature',
-        'date_debut',
-        'date_fin',
-        'date_limite_depot',
-        'heure',      // heure au format "HH:MM:SS"
-        'duree',
-        'prix',
-        'lieu',
-        'type',
-        'id_categorie',
-    ];
+    'titre', 'description', 'public_vise', 'objectifs', 'format', 'certifiante',
+    'date_debut_candidature', 'date_debut', 'date_fin', 'date_limite_depot', 'heure',
+    'duree', 'prix', 'lieu', 'type', 'id_categorie', 'user_id',
+];
+
 
     protected $casts = [
         'date_debut_candidature' => 'date',
@@ -30,7 +22,7 @@ class Formation extends Model
         'date_fin' => 'date',
         'date_limite_depot' => 'date',
         'prix' => 'decimal:2',
-            'date_heure' => 'string', // ou 'datetime:H:i' si tu utilises Carbon
+        'date_heure' => 'string', // ou 'datetime:H:i' si tu utilises Carbon
 
     ];
 
@@ -42,9 +34,32 @@ public function getHeureFormateAttribute()
     return $this->heure ? Carbon::parse($this->heure)->format('H\hi') : null;
 }
 
-
-    public function categorie()
+public function categorie()
     {
-        return $this->belongsTo(Categorie::class, 'id_categorie');
+        return $this->belongsTo(Categorie::class, foreignKey: 'id_categorie');
     }
+// Admin qui a créé la formation
+
+    public function user()
+{
+    return $this->belongsTo(User::class, foreignKey: 'user_id');
+}
+
+
+// Toutes les candidatures pour cette formation
+
+public function candidatures()
+{
+    return $this->hasMany(Candidature::class, 'id_formation', 'id');
+}
+
+
+public function candidats()
+{
+    return $this->belongsToMany(Candidat::class, 'candidatures', 'id_formation', 'id_candidat')
+                ->withPivot('statut')
+                ->withTimestamps();
+}
+
+
 }

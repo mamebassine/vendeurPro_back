@@ -22,6 +22,11 @@ return new class extends Migration
             $table->string('phone')->nullable();    // Numéro de téléphone
             $table->string('address')->nullable();  // Adresse postale
             $table->enum('role', ['user', 'admin'])->default('user'); // Rôle de l'utilisateur
+            
+            $table->string('code_parrainage')->nullable()->unique(); // Code unique pour chaque utilisateur
+            $table->decimal('solde', 10, 2)->default(0); // montant avec 2 décimales
+
+
             $table->rememberToken();
             $table->timestamps();
         });
