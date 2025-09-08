@@ -100,7 +100,9 @@ public function store(Request $request)
             'contenu' => 'required|string',
             'auteur' => 'required|string|max:255',
             'fonction' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            // 'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+
         'points' => 'nullable|string',
 
         ]);
