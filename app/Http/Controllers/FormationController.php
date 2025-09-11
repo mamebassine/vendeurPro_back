@@ -220,4 +220,31 @@ class FormationController extends Controller
 
         return response()->json(['message' => 'Formation supprimée avec succès'], 200);
     }
+
+
+
+    // Gestions des mises à jour spécifiques pour webinaire et coaching
+    
+public function updateWebinaire(Request $request, $id)
+{
+    $webinaire = Formation::findOrFail($id);
+    $webinaire->update($request->all());
+
+    return response()->json([
+        'message' => 'Webinaire mis à jour avec succès',
+        'data' => $webinaire
+    ]);
+}
+
+public function updateCoaching(Request $request, $id)
+{
+    $coaching = Formation::findOrFail($id);
+    $coaching->update($request->all());
+
+    return response()->json([
+        'message' => 'Coaching mis à jour avec succès',
+        'data' => $coaching
+    ]);
+}
+
 }

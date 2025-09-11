@@ -62,30 +62,74 @@ class ActualiteController extends Controller
 // }
 
 
+// public function store(Request $request)
+// {
+//     $validated = $request->validate([
+//         'titre' => 'required|string|max:255',
+//         'contenu' => 'required|string',
+//         'auteur' => 'nullable|string',
+//         'fonction' => 'nullable|string',
+//         'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+//         'date_publication' => 'nullable|date',
+//         'points' => 'nullable|array',
+//         'conclusion' => 'nullable|string',
+//         'user_id' => 'nullable|exists:users,id',
+//     ]);
+
+//     // ✅ Upload de l'image si présente
+//     if ($request->hasFile('image')) {
+//         $path = $request->file('image')->store('actualites', 'public');
+//         $validated['image'] = $path;
+//     }
+
+//     $actualite = Actualite::create($validated);
+
+//     return response()->json($actualite, 201);
+// }
 public function store(Request $request)
 {
+    // Vérifier si l’utilisateur est connecté
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json(['message' => 'Utilisateur non authentifié'], 401);
+    }
+
+    // Validation
     $validated = $request->validate([
         'titre' => 'required|string|max:255',
         'contenu' => 'required|string',
         'auteur' => 'nullable|string',
         'fonction' => 'nullable|string',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-        'date_publication' => 'nullable|date',
-        'points' => 'nullable|array',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120', // 5 Mo
+        'points' => 'nullable|array', // tableau attendu
         'conclusion' => 'nullable|string',
-        'user_id' => 'nullable|exists:users,id',
     ]);
 
-    // ✅ Upload de l'image si présente
+    // 👉 Ici on transforme points (tableau) en JSON pour la BDD
+    if ($request->has('points')) {
+        $validated['points'] = json_encode($request->points);
+    }
+
+    // Upload image si présente
     if ($request->hasFile('image')) {
         $path = $request->file('image')->store('actualites', 'public');
         $validated['image'] = $path;
     }
 
+    // Associer l’utilisateur connecté
+    $validated['user_id'] = $user->id;
+
+    // Créer l’actualité
     $actualite = Actualite::create($validated);
 
-    return response()->json($actualite, 201);
+    return response()->json([
+        'message' => 'Actualité ajoutée avec succès',
+        'data' => $actualite
+    ], 201);
 }
+
+
+
 
 
 
@@ -94,18 +138,24 @@ public function store(Request $request)
     {
         $actualite = Actualite::findOrFail($id);
 
+        //
+
         $request->validate([
-            'titre' => 'required|string|max:255',
-            'date_publication' => 'required|date',
-            'contenu' => 'required|string',
-            'auteur' => 'required|string|max:255',
-            'fonction' => 'required|string|max:255',
-            // 'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+    'titre' => 'required|string|max:255',
+    'contenu' => 'required|string',
+    'auteur' => 'required|string|max:255',
+    'fonction' => 'required|string|max:255',
+    'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+    'points' => 'nullable|array', // ← ici
+]);
 
-        'points' => 'nullable|string',
+// Transformer points en JSON pour la BDD
+if ($request->has('points')) {
+    $request->merge([
+        'points' => json_encode($request->points)
+    ]);
+}
 
-        ]);
 
         // Traitement de l’image si une nouvelle est envoyée
         if ($request->hasFile('image')) {
@@ -120,7 +170,6 @@ public function store(Request $request)
         // Mise à jour des autres champs
         $actualite->update([
             'titre' => $request->titre,
-            'date_publication' => $request->date_publication,
             'contenu' => $request->contenu,
             'auteur' => $request->auteur,
             'fonction' => $request->fonction,

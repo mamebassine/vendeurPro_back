@@ -122,6 +122,9 @@ Route::delete('/commissions/{id}', [CommissionController::class, 'destroy']);
 Route::post('ajouter-webinaire', [FormationController::class, 'ajouterWebinaire']);
 Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching']);
 
+// Modification d'un coaching ou d'un webinaire
+Route::put('ajouter-webinaire/{id}', [FormationController::class, 'updateWebinaire']);
+Route::put('ajouter-coaching/{id}', [FormationController::class, 'updateCoaching']);
 
 
 
