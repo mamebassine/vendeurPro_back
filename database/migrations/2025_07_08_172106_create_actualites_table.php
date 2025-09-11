@@ -17,8 +17,9 @@ return new class extends Migration
         $table->text('contenu'); // texte principal introductif
         $table->string('auteur');
         $table->string('fonction')->nullable();
-        $table->string('image')->nullable();
-        $table->dateTime('date_publication');
+        // $table->string('image')->nullable();
+        $table->string('image', 1024)->nullable(); // jusqu'à 1024 caractères
+
         $table->json('points')->nullable(); // liste de blocs
         $table->text('conclusion')->nullable(); // paragraphe final
         $table->foreignId('user_id')->constrained()->onDelete('cascade'); // 🔗 Relation avec users
