@@ -23,6 +23,8 @@ Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 // 🔓 Inscription d'un nouvel utilisateur
 Route::post('register', action: [AuthController::class, 'register']);
 
+
+
 // 🔓 Connexion d'un utilisateur (retourne un token)
 Route::post('login', action: [AuthController::class, 'login'])->name('login');
 
@@ -57,6 +59,12 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
 
 // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
                Route::middleware('auth:api')->group(function () {
+
+// 🔐 Récupérer le lien de parrainage de l'utilisateur connecté
+//Route::get('/mon-lien-parrainage', [AuthController::class, 'monLienParrainage']);
+
+
+
 
     // Chaque parrain connecté voit seulement ses propres filleuls
        Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);

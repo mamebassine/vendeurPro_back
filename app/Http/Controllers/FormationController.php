@@ -13,16 +13,36 @@ class FormationController extends Controller
     /**
      * Lister toutes les formations, coachings, webinaires, etc.
      */
-    public function index()
-    {
-        // On récupère toutes les formations avec leur catégorie et les infos utilisateurs (nom, prénom)
-        $formations = Formation::with([
-            'categorie:id,nom',
-            'user:id,name,prenom'
-        ])->get();
+public function index(Request $request)
+{
+    // 🔹 Récupère le code de parrainage si présent dans l'URL
+    $codeParrainage = $request->query('ref');
 
-        return response()->json($formations, 200);
-    }
+    // 🔹 Récupère toutes les formations avec leur catégorie et auteur
+    $formations = Formation::with([
+        'categorie:id,nom',
+        'user:id,name,prenom'
+    ])->get();
+
+    // 🔹 Retour JSON avec code de parrainage
+    return response()->json([
+        'success' => true,
+        'formations' => $formations,
+        'code_parrainage' => $codeParrainage
+    ], 200);
+}
+
+
+
+//     public function index()
+//     {
+//         $formations = Formation::with([
+//             'categorie:id,nom',
+//             'user:id,name,prenom'
+//         ])->get();
+
+// return response()->json($formations, 200);
+//     }
 
     /**
      * Afficher uniquement les formations dont la catégorie est "formation"
@@ -224,7 +244,7 @@ class FormationController extends Controller
 
 
     // Gestions des mises à jour spécifiques pour webinaire et coaching
-    
+
 public function updateWebinaire(Request $request, $id)
 {
     $webinaire = Formation::findOrFail($id);

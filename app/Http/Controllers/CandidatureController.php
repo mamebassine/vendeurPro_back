@@ -98,7 +98,7 @@ class CandidatureController extends Controller
     /**
      * Enregistrement depuis le formulaire public (sans authentification).
      */
-    public function storeFromPublic(Request $request)
+     public function storeFromPublic(Request $request)
     {
         $validated = $request->validate([
             'formation_id' => 'required|exists:formations,id',
@@ -121,7 +121,7 @@ class CandidatureController extends Controller
                 'telephone' => $validated['telephone'],
                 'adresse' => $validated['adresse'],
                 'genre' => $validated['genre'] ?? null,
-                
+
             ]);
         }
 
@@ -170,7 +170,7 @@ class CandidatureController extends Controller
     }
 
 
-    
+
     /**
      * Met à jour une candidature existante.
      */
@@ -223,7 +223,7 @@ public function update(Request $request, $id)
                 // Trouver le parrain via code_parrainage
                 $parrain = null;
                 if ($candidat->code_parrainage) {
-                    
+
                     $parrain = Candidat::where('code_parrainage', $candidat->code_parrainage)
                                 ->where('id', '!=', $candidat->id)
                                 ->first();
@@ -304,5 +304,5 @@ public function update(Request $request, $id)
 
 
 
-    
+
 }
