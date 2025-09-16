@@ -27,6 +27,7 @@ class User extends Authenticatable implements JWTSubject
         'image',
         'code_parrainage',  // Code de parrainage unique
         'solde',
+    // 'lien_parrainage',
 
     ];
 
@@ -39,6 +40,9 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
+
+ // ✅ Ajouter l’attribut virtuel pour le lien de parrainage
+    //protected $appends = ['lien_parrainage'];
 
     /**
      * Get the identifier that will be stored in the JWT token.
@@ -78,6 +82,20 @@ class User extends Authenticatable implements JWTSubject
 {
     return $this->image ? asset('storage/' . $this->image) : null;
 }
+
+
+/**
+     * Génère dynamiquement le lien de parrainage
+     */
+//    public function getLienParrainageAttribute()
+// {
+//     return $this->code_parrainage ? url('/api/formations?ref=' . $this->code_parrainage) : null;
+// }
+
+
+
+    // Relations
+
 public function formations()
 {
     return $this->hasMany(Formation::class);
@@ -119,7 +137,6 @@ public function commissions()
 }
 
 
-
- }
+}
 
 

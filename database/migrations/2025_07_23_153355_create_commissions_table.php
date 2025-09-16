@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
-   
+
     public function up(): void
     {
         Schema::create('commissions', function (Blueprint $table) {
@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null'); // Admin valideur
             $table->decimal('montant_commission', 8, 2)->default(0);
             $table->string('code_parrainage')->nullable(); // lien ou code de parrainage
+            $table->string('lien_parrainage')->nullable(); // Lien complet
             $table->boolean('commission_versee')->default(false);
             $table->timestamps();
         });
