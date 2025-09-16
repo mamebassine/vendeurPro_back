@@ -22,11 +22,9 @@ Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 // 🔓 Inscription d'un nouvel utilisateur
 Route::post('register', action: [AuthController::class, 'register']);
-
-
-
 // 🔓 Connexion d'un utilisateur (retourne un token)
 Route::post('login', action: [AuthController::class, 'login'])->name('login');
+
 
        // 📌 Route publique pour candidater à une formation sans compte
 
@@ -74,6 +72,8 @@ Route::get('formation', [FormationController::class, 'afficherFormations']);
 
     // (optionnel) Liste des users parrains si besoin en admin
 Route::get('users', [AuthController::class, 'userList']);
+Route::put('users/{id}', [AuthController::class, 'updateUser']);
+
 
 
    // Liste des commissions
@@ -134,11 +134,7 @@ Route::post('ajouter-coaching', [FormationController::class, 'ajouterCoaching'])
 Route::put('ajouter-webinaire/{id}', [FormationController::class, 'updateWebinaire']);
 Route::put('ajouter-coaching/{id}', [FormationController::class, 'updateCoaching']);
 
-
-
-
-
-                              // 🔒 Gestion des catégories (admin uniquement)
+               // 🔒 Gestion des catégories (admin uniquement)
 
                // 🔐 Lister toutes les catégories
                Route::get('categories', [CategorieController::class, 'index']);

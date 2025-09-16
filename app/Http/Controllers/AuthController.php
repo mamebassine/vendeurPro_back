@@ -250,4 +250,73 @@ public function userList()
 }
 
 
+
+
+
+/**
+ * Mettre à jour un utilisateur existant
+ */
+public function updateUser(Request $request, $id)
+{
+    // Récupère l'utilisateur à modifier
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Utilisateur non trouvé.'
+        ], 404);
+    }
+
+    // Validation des champs
+    $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'prenom' => 'sometimes|required|string|max:255',
+        'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+        'password' => 'sometimes|nullable|string|min:8',
+        'phone' => 'sometimes|required|string|min:9',
+        'address' => 'nullable|string|max:255',
+        'role' => 'nullable|string|in:admin,user',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    // Commence la transaction
+    try {
+        DB::beginTransaction();
+
+        // Mettre à jour les champs simples
+        $user->name = $request->name ?? $user->name;
+        $user->prenom = $request->prenom ?? $user->prenom;
+        $user->email = $request->email ?? $user->email;
+        $user->phone = $request->phone ?? $user->phone;
+        $user->address = $request->address ?? $user->address;
+        $user->role = $request->role ?? $user->role;
+
+        // Mettre à jour le mot de passe si fourni
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        // Mettre à jour l'image si fournie
+        if ($request->hasFile('image')) {
+            $user->image = $request->file('image')->store('users', 'public');
+        }
+
+        $user->save();
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Utilisateur mis à jour avec succès.',
+            'data' => $user
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur lors de la mise à jour.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }
