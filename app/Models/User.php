@@ -83,18 +83,7 @@ class User extends Authenticatable implements JWTSubject
     return $this->image ? asset('storage/' . $this->image) : null;
 }
 
-
-/**
-     * Génère dynamiquement le lien de parrainage
-     */
-//    public function getLienParrainageAttribute()
-// {
-//     return $this->code_parrainage ? url('/api/formations?ref=' . $this->code_parrainage) : null;
-// }
-
-
-
-    // Relations
+ // Relations
 
 public function formations()
 {
@@ -135,6 +124,31 @@ public function commissions()
 {
     return $this->hasMany(Commission::class, 'code_parrainage', 'code_parrainage');
 }
+
+
+
+
+
+
+// Parrain → ses filleuls
+public function filleuls()
+{
+    // Le parrain a plusieurs filleuls qui ont utilisé son code de parrainage
+    return $this->hasMany(User::class, 'code_parrainage_utilise', 'code_parrainage');
+}
+
+// Filleul → sa formation
+public function formation()
+{
+    return $this->belongsTo(Formation::class, 'formation_id');
+}
+
+// Candidatures d’un utilisateur (filleul)
+public function candidatures()
+{
+    return $this->hasMany(Candidature::class, 'user_id');
+}
+
 
 
 }

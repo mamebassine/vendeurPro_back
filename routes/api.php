@@ -4,15 +4,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CandidatController;
-use App\Http\Controllers\FormationController;
-use App\Http\Controllers\CandidatureController;
+use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\CategorieController;
-
 use App\Http\Controllers\DashboardController;
 
-use App\Http\Controllers\ActualiteController;
+use App\Http\Controllers\FormationController;
 
 use App\Http\Controllers\CommissionController;
+
+use App\Http\Controllers\CandidatureController;
+use App\Http\Controllers\ParrainDashboardController;
 
 
 Route::get('/actualites', [ActualiteController::class, 'index']);           // Lister toutes les actualités
@@ -188,6 +189,16 @@ Route::put('ajouter-coaching/{id}', [FormationController::class, 'updateCoaching
 
                // 🔐 Supprimer un candidat
                Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
+
+
+
+
+
+// Dashboard du parrain (stats et informations)
+Route::get('/parrain/dashboard', [ParrainDashboardController::class, 'index']);
+
+    // Chaque parrain connecté voit seulement ses propres filleuls
+    //Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);
 
             });
 

@@ -41,4 +41,5 @@ public function commissions()
         return $this->hasOne(Commission::class); // Une candidature a une seule commission
     }
     
+
 }
