@@ -11,10 +11,26 @@ use Illuminate\Support\Facades\Storage;
 class ActualiteController extends Controller
 {
     // Liste toutes les actualités
-    public function index()
-    {
-        return response()->json(Actualite::all(), 200);
-    }
+    // public function index()
+    // {
+    //     return response()->json(Actualite::all(), 200);
+    // }
+
+public function index()
+{
+    $actualites = Actualite::all();
+
+    // Générer l'URL complète pour chaque image
+    $actualites->map(function ($actualite) {
+        $actualite->image_url = $actualite->image ? asset('storage/' . $actualite->image) : null;
+        return $actualite;
+    });
+
+    return response()->json($actualites, 200);
+}
+
+
+
 
     // Crée une nouvelle actualité
 //    public function store(Request $request)
@@ -187,16 +203,30 @@ if ($request->has('points')) {
     }
 
     // Affiche une actualité spécifique
+    // public function show($id)
+    // {
+    //     $actualite = Actualite::find($id);
+
+    //     if (!$actualite) {
+    //         return response()->json(['message' => 'Actualité non trouvée'], 404);
+    //     }
+
+    //     return response()->json($actualite);
+    // }
+
     public function show($id)
-    {
-        $actualite = Actualite::find($id);
+{
+    $actualite = Actualite::find($id);
 
-        if (!$actualite) {
-            return response()->json(['message' => 'Actualité non trouvée'], 404);
-        }
-
-        return response()->json($actualite);
+    if (!$actualite) {
+        return response()->json(['message' => 'Actualité non trouvée'], 404);
     }
+
+    $actualite->image_url = $actualite->image ? asset('storage/' . $actualite->image) : null;
+
+    return response()->json($actualite);
+}
+
 
     // Supprime une actualité
     public function destroy($id)
