@@ -22,9 +22,9 @@ Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // A
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 // 🔓 Inscription d'un nouvel utilisateur
-Route::post('register', [AuthController::class, 'register']);
+// Route::post('register', [AuthController::class, 'register']);
 
-// Route::post('register', action: [AuthController::class, 'register']);
+Route::post('register', action: [AuthController::class, 'register']);
 
 // 🔓 Connexion d'un utilisateur (retourne un token)
 Route::post('login', action: [AuthController::class, 'login'])->name('login');

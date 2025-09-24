@@ -123,16 +123,7 @@ public function register(Request $request)
         }
 
 // --- AJOUTER ICI POUR ENVOYER LE MAIL ---
-
-// .env (local)
-// $lienParrainage = "http://localhost:5173/userlogin";
-
-// .env (production)
 $lienParrainage = "http://vendeur-pro.com/userlogin";
-
-// Générer automatiquement le lien de parrainage selon l'environnement
-//$lienParrainage = env('APP_URL') . '/userlogin';
-
 // Envoyer la notification avec le lien
 $user->notify(new ParrainCreatedTest($user, $lienParrainage, $request->password));
 
