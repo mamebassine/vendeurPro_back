@@ -12,6 +12,10 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+
+use Illuminate\Support\Facades\Notification; // en haut du fichier
+use App\Notifications\ParrainCreatedTest;
+
 class AuthController extends Controller
 {
 /**
@@ -62,36 +66,6 @@ public function listeCandidatsParraines(Request $request)
         'fillieuls' => $user->candidaturesParrain
     ]);
 }
-
-
-// public function monLienParrainage()
-// {
-//     // Récupérer le parrain connecté
-//     $user = JWTAuth::parseToken()->authenticate();
-
-//     // Vérifier que c'est bien un parrain
-//     if ($user->role !== 'user') {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Accès non autorisé. Seuls les parrains peuvent accéder à cette ressource.'
-//         ], 403);
-//     }
-
-//     // Vérifier que le code existe (au cas où)
-//     if (!$user->code_parrainage) {
-//         $user->code_parrainage = Str::upper(Str::random(10));
-//         $user->save();
-//     }
-
-//     // Générer le lien de parrainage
-//     $lienParrainage = url('/register?code=' . $user->code_parrainage);
-
-//     return response()->json([
-//         'success' => true,
-//         'code_parrainage' => $user->code_parrainage,
-//         'lien_parrainage' => $lienParrainage
-//     ]);
-// }
 
 public function register(Request $request)
 {
@@ -148,6 +122,11 @@ public function register(Request $request)
             }
         }
 
+// --- AJOUTER ICI POUR ENVOYER LE MAIL ---
+$lienParrainage = "http://localhost:5173/userlogin";
+$user->notify(new ParrainCreatedTest($user, $lienParrainage, $request->password));
+
+
        DB::commit();
 
 // Retour JSON en utilisant uniquement le lien stocké
@@ -155,9 +134,7 @@ return response()->json([
     'success' => true,
     'message' => 'Utilisateur inscrit avec succès.',
     'data' => $user,  // Contient code_parrainage + lien_parrainage généré
-    // 'code_parrainage' => $user->code_parrainage,
-    // 'lien_parrainage' => $user->lien_parrainage
-], 201);
+   ], 201);
 
 
     } catch (QueryException $e) {
@@ -318,5 +295,26 @@ public function updateUser(Request $request, $id)
         ], 500);
     }
 }
+
+
+
+
+
+
+/**
+ * Supprimer un utilisateur
+ */
+
+public function deleteUser($id)
+{
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+    }
+
+    $user->delete();
+    return response()->json(['message' => 'Utilisateur supprimé avec succès']);
+}
+
 
 }

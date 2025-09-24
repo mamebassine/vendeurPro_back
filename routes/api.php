@@ -22,7 +22,10 @@ Route::get('/actualites/{id}', [ActualiteController::class, 'show']);       // A
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 // 🔓 Inscription d'un nouvel utilisateur
-Route::post('register', action: [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'register']);
+
+// Route::post('register', action: [AuthController::class, 'register']);
+
 // 🔓 Connexion d'un utilisateur (retourne un token)
 Route::post('login', action: [AuthController::class, 'login'])->name('login');
 
@@ -54,30 +57,21 @@ Route::get('webinaire', [FormationController::class, 'afficherWebinaire']);
 Route::get('coaching', [FormationController::class, 'afficherCoaching']);
 Route::get('formation', [FormationController::class, 'afficherFormations']);
 
-
-
 // 📌 Toutes les routes ci-dessous nécessitent une authentification (token requis)
+
                Route::middleware('auth:api')->group(function () {
 
-// 🔐 Récupérer le lien de parrainage de l'utilisateur connecté
-//Route::get('/mon-lien-parrainage', [AuthController::class, 'monLienParrainage']);
-
-
-
-
-    // Chaque parrain connecté voit seulement ses propres filleuls
+// Chaque parrain connecté voit seulement ses propres filleuls
        Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);
 
-       // Liste des candidats parrainés par un user spécifique
-       //Route::get('/candidats-parrain/{userId}', [AuthController::class, 'candidatsParrainParUser']);
-
-    // (optionnel) Liste des users parrains si besoin en admin
+       // (optionnel) Liste des users parrains si besoin en admin
 Route::get('users', [AuthController::class, 'userList']);
 Route::put('users/{id}', [AuthController::class, 'updateUser']);
+// Route pour supprimer un parrain (accessible uniquement par admin)
+Route::delete('users/{id}', [AuthController::class, 'deleteUser']);
 
 
-
-   // Liste des commissions
+// Liste des commissions
 
                  // Liste des commissions (admin)
 Route::get('/commissions', [CommissionController::class, 'listeCommissions']);
@@ -152,10 +146,7 @@ Route::put('ajouter-coaching/{id}', [FormationController::class, 'updateCoaching
                // 🔐 Supprimer une catégorie
                Route::delete('categories/{id}', [CategorieController::class, 'destroy']);
 
-
-
-
-                         // 🔒 Gestion des candidatures (consultation et gestion par admin uniquement)
+// 🔒 Gestion des candidatures (consultation et gestion par admin uniquement)
 
                // 🔐 Lister toutes les candidatures reçues
                Route::get('candidatures', [CandidatureController::class, 'index']);
@@ -190,15 +181,8 @@ Route::put('ajouter-coaching/{id}', [FormationController::class, 'updateCoaching
                // 🔐 Supprimer un candidat
                Route::delete('candidats/{id}', [CandidatController::class, 'destroy']);
 
-
-
-
-
 // Dashboard du parrain (stats et informations)
 Route::get('/parrain/dashboard', [ParrainDashboardController::class, 'index']);
-
-    // Chaque parrain connecté voit seulement ses propres filleuls
-    //Route::get('/candidats-parraines', [AuthController::class, 'listeCandidatsParraines']);
 
             });
 
