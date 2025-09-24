@@ -123,7 +123,7 @@ public function register(Request $request)
         }
 
 // --- AJOUTER ICI POUR ENVOYER LE MAIL ---
-$lienParrainage = "http://vendeur-pro.com/userlogin";
+$lienParrainage = "https://vendeur-pro.com/userlogin";
 // Envoyer la notification avec le lien
 $user->notify(new ParrainCreatedTest($user, $lienParrainage, $request->password));
 

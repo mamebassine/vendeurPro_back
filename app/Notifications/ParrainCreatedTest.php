@@ -12,7 +12,7 @@ class ParrainCreatedTest extends Notification
 
     public $user;
     public $lienParrainage;
-    public $password; // ✅ ajout du mot de passe
+    public $password;
 
     /**
      * Create a new notification instance.
@@ -21,7 +21,7 @@ class ParrainCreatedTest extends Notification
     {
         $this->user = $user;
         $this->lienParrainage = $lienParrainage;
-        $this->password = $password; // ✅ stocker le mot de passe
+        $this->password = $password;
     }
 
     /**
@@ -33,20 +33,19 @@ class ParrainCreatedTest extends Notification
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Get the mail representation of the notification using a Blade template.
      */
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Bienvenue comme Parrain (Test)')
-            ->greeting('Bonjour ' . $this->user->name)
-            ->line('Vous avez été inscrit en tant que Parrain sur notre site.')
-            ->line('Voici vos coordonnées :')
-            ->line('📧 Email : ' . $this->user->email)
-            ->line('📱 Téléphone : ' . $this->user->phone)
-            ->line('🔑 Mot de passe temporaire : ' . $this->password) // ✅ affichage du mot de passe
-            ->action('Lien de parrainage', $this->lienParrainage)
-            ->line('Merci de votre engagement !');
+            ->subject('Bienvenue comme Parrain sur Vendeur Pro !')
+            ->view('notifications.parrain_created', [ // <-- chemin correct
+                'name' => $this->user->name,
+                'email' => $this->user->email,
+                'phone' => $this->user->phone,
+                'password' => $this->password,
+                'lienParrainage' => $this->lienParrainage,
+            ]);
     }
 
     /**
@@ -58,7 +57,7 @@ class ParrainCreatedTest extends Notification
             'email' => $this->user->email,
             'phone' => $this->user->phone,
             'lienParrainage' => $this->lienParrainage,
-            'password' => $this->password, // ✅ ajouté ici aussi
+            'password' => $this->password,
         ];
     }
 }
